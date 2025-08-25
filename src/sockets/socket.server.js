@@ -45,12 +45,14 @@ function initSocketServer(httpServer) {
         role: "user",
       });
 
-      const vectors = await aiService.genrateVector(messagePayLoad.content);
-      
+      const vectors = await aiService.generateVector(messagePayLoad.content);
+
       const memory = await queryMemory({
         queryVector: vectors,
         limit: 3,
-        metadata: {},
+        metadata: {
+          user: socket.user._id
+        },
       });
       await createMemory({
         vectors,
@@ -88,9 +90,9 @@ function initSocketServer(httpServer) {
           }]
         }
       ]
-      console.log([...ltm,...stm]);
+      
 
-      const response = await aiService.genrateResponce([ ...ltm, ...stm]);
+      const response = await aiService.generateResponse([ ...ltm, ...stm]);
 
       const responseMessage = await messageModel.create({
         chat: messagePayLoad.chat,
@@ -99,9 +101,9 @@ function initSocketServer(httpServer) {
         role: "model",
       });
 
-      const responceVector = await aiService.genrateVector(response);
+      const responseVector = await aiService.generateVector(response);
       await createMemory({
-        vectors: responceVector,
+        vectors: responseVector,
         messageId: responseMessage._id,
         metadata: {
           chat: messagePayLoad.chat,
